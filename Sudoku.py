@@ -1,5 +1,8 @@
 import numpy
-puzzleFile = 'Puzzles/Easy-P2.txt'
+GROUP_ID = 'Group04'
+ALGORITHM = 'bt'
+PUZZLE_TYPE = 'easy'
+PUZZLE_PATH = 'puzzles/Easy-P1.txt'
 
 
 def checkPuzzle(p):
@@ -44,7 +47,7 @@ def checkPuzzle(p):
 
 #Processes the sudoku file into a numpy array
 arr = []
-with open(puzzleFile, 'r') as file:
+with open(PUZZLE_PATH, 'r') as file:
     firstLine = True
     for line in file:
         processedLine = line.rstrip('\n')
@@ -54,6 +57,7 @@ with open(puzzleFile, 'r') as file:
         else:
             row = processedLine.split(",")
         arr.append(row)
+    file.close()
 puzzle = numpy.array(arr)
 
 
@@ -61,4 +65,15 @@ puzzle[6][2] = '6'
 print(puzzle)
 print("\n")
 checkPuzzle(puzzle)
+
+#Writing the finished puzzle to a file
+fileName = GROUP_ID + '_' + ALGORITHM + "_" + PUZZLE_TYPE + "_" + PUZZLE_PATH.lstrip("puzzles/")
+with open(fileName, 'w') as file:
+    for row in range(9):
+        for column in range(8):
+            file.write(puzzle[row][column] + ",")
+        file.write(puzzle[row][8] + '\n')
+
+
+    file.close()
 
