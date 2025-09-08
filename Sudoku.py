@@ -1,8 +1,5 @@
 import copy
-
 import numpy
-from nbformat.sign import algorithms
-
 GROUP_ID = 'Group04'
 ALGORITHM = 'bt'
 PUZZLE_TYPE = 'easy'
@@ -65,7 +62,6 @@ def checkPuzzle(p):
             if len(newNums) > len(setNums):
                 #print("Fails to pass 3x3 rule")
                 return False
-
     return True
 
 #Simple backtracking algorithm using a stack
