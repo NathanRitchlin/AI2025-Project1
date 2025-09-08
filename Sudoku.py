@@ -2,16 +2,36 @@ import numpy
 GROUP_ID = 'Group04'
 ALGORITHM = 'bt'
 PUZZLE_TYPE = 'easy'
-PUZZLE_PATH = 'puzzles/Easy-P1.txt'
+PUZZLE_PATH = 'puzzles/Hard-P4.txt'
 
+#prints the sudoku puzzle, used for debugging
+def printPuzzle(puzzle):
+    for row in range(9):
+        for column in range(8):
+            print(puzzle[row][column].value + ",", end = "")
+        print(puzzle[row][8].value)
+    print("\n")
+
+
+#class for each tile on the board which holds information about the tile's position, value, if it is fixed or not, and its domain
+class sudokuTile:
+    def __init__(self, pos, val, layer):
+        self.position = pos
+        self.layer = layer
+        self.value = val
+        self.fixed = True
+        if val == '?':
+            self.fixed = False
+            self.domain = ['1','2','3','4','5','6','7','8','9']
+        else:
+            self.domain = [val]
 
 def checkPuzzle(p):
-
     #checks if puzzle passes row rule
     for row in range(9):
         nums = []
         for column in range(9):
-            nums.append(p[row][column])
+            nums.append(p[row][column].value)
         newNums = [item for item in nums if item != "?"]
         setNums = set(newNums)
         if len(newNums) > len(setNums):
@@ -23,7 +43,7 @@ def checkPuzzle(p):
     for column in range(9):
         nums = []
         for row in range(9):
-            nums.append(p[row][column])
+            nums.append(p[row][column].value)
         newNums = [item for item in nums if item != "?"]
         setNums = set(newNums)
         if len(newNums) > len(setNums):
@@ -36,7 +56,7 @@ def checkPuzzle(p):
             nums = []
             for row in range(0+(i*3), (i*3)+3):
                 for column in range(0+(j*3), (j*3)+3):
-                    nums.append(p[row][column])
+                    nums.append(p[row][column].value)
             newNums = [item for item in nums if item != "?"]
             setNums = set(newNums)
             if len(newNums) > len(setNums):
@@ -45,35 +65,91 @@ def checkPuzzle(p):
 
     return True
 
-#Processes the sudoku file into a numpy array
+#Processes the sudoku file into a numpy array of sudokuTile objects
 arr = []
+layer = 0
 with open(PUZZLE_PATH, 'r') as file:
     firstLine = True
+    rowNum = 0
     for line in file:
+        colNum = 0
         processedLine = line.rstrip('\n')
         if(firstLine):
             row = processedLine[3:].split(",")
             firstLine = False
         else:
             row = processedLine.split(",")
-        arr.append(row)
+        tileRow = []
+        for num in row:
+            tile = sudokuTile([rowNum, colNum], num, layer)
+            layer += 1
+            tileRow.append(tile)
+            colNum += 1
+        arr.append(tileRow)
+        rowNum += 1
     file.close()
 puzzle = numpy.array(arr)
 
 
-puzzle[6][2] = '6'
-print(puzzle)
-print("\n")
-checkPuzzle(puzzle)
+#setting up the stack with the inital possible values for the first tile
+stack = [(puzzle[0][0], d) for d in puzzle[0][0].domain]
+layer = 0
+steps = 0
+while len(stack) > 0:
+    #pop the top value off of the stack, and set the given tile's value to the given value
+    prevLayer = layer
+    steps += 1
+    action = stack.pop()
+    tile = action[0]
+    val = action[1]
+    tile.value = val
+    #if the value is valid for the puzzle, add all the possible values for the next position on the board to the stack
+    if (checkPuzzle(puzzle)):
+        layer = tile.layer + 1
+        #puzzle has been solved
+        if(layer == 81):
+            printPuzzle(puzzle)
+            print("total number of steps:", steps)
+            print("puzzle solved")
+            break
+        row = layer // 9
+        col = layer % 9
+        nextTile = puzzle[row][col]
+        for d1 in nextTile.domain:
+            stack.append((nextTile, d1))
+    #if the value is not valid, set the tile back to an unknown, and don't continue searching that path (prune said branch)
+    else:
+        if(not tile.fixed):
+            layer = tile.layer
+            tile.value = '?'
+
+    #when backtracking, cleanup all unfixed tiles by turning them back into unknowns
+    if(prevLayer > layer):
+        for i in range(layer+1, prevLayer):
+            row = i // 9
+            col = i % 9
+            resetTile = puzzle[row][col]
+            if not (resetTile.fixed):
+                resetTile.value = '?'
+
+        #fix for edge case where puzzle couldn't backtrack to '1' in the starting square
+        if(len(stack)== 0 and puzzle[0][0].value == '?'):
+            puzzle[0][0].value = '1'
+            nextTile = puzzle[0][1]
+            for d1 in nextTile.domain:
+                stack.append((nextTile, d1))
+
+
+
+
 
 #Writing the finished puzzle to a file
 fileName = GROUP_ID + '_' + ALGORITHM + "_" + PUZZLE_TYPE + "_" + PUZZLE_PATH.lstrip("puzzles/")
 with open(fileName, 'w') as file:
     for row in range(9):
         for column in range(8):
-            file.write(puzzle[row][column] + ",")
-        file.write(puzzle[row][8] + '\n')
-
-
+            file.write(puzzle[row][column].value + ",")
+        file.write(puzzle[row][8].value + '\n')
     file.close()
+
 
