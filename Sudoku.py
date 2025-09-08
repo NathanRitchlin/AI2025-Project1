@@ -123,7 +123,6 @@ def forwardChecking(puzzle):
     layer = 0
     steps = 0
     while len(stack) > 0:
-        printPuzzle(puzzle)
         # pop the top value off of the stack, and set the given tile's value to the given value
         prevLayer = layer
         steps += 1
@@ -175,51 +174,52 @@ def forwardChecking(puzzle):
                     stack.append((nextTile, d1))
     return puzzle, steps
 
-#Processes the sudoku file into a numpy array of sudokuTile objects
-arr = []
-layer = 0
-with open(PUZZLE_PATH, 'r') as file:
-    firstLine = True
-    rowNum = 0
-    for line in file:
-        colNum = 0
-        processedLine = line.rstrip('\n')
-        if(firstLine):
-            row = processedLine[3:].split(",")
-            firstLine = False
-        else:
-            row = processedLine.split(",")
-        tileRow = []
-        for num in row:
-            tile = sudokuTile([rowNum, colNum], num, layer)
-            layer += 1
-            tileRow.append(tile)
-            colNum += 1
-        arr.append(tileRow)
-        rowNum += 1
-    file.close()
-puzzle = numpy.array(arr)
-originalPuzzle = copy.deepcopy(puzzle)
-if(ALGORITHM == 'bt'):
-    solvedPuzzle, steps = backTracking(puzzle)
-elif(ALGORITHM == 'fc'):
-    solvedPuzzle, steps = forwardChecking(puzzle)
-print(ALGORITHM)
-print(PUZZLE_PATH)
-print("=====================")
-print("Original Puzzle: ")
-printPuzzle(originalPuzzle)
-print("Solved Puzzle in", steps, "steps:")
-printPuzzle(solvedPuzzle)
+if __name__ == "__main__":
+    #Processes the sudoku file into a numpy array of sudokuTile objects
+    arr = []
+    layer = 0
+    with open(PUZZLE_PATH, 'r') as file:
+        firstLine = True
+        rowNum = 0
+        for line in file:
+            colNum = 0
+            processedLine = line.rstrip('\n')
+            if(firstLine):
+                row = processedLine[3:].split(",")
+                firstLine = False
+            else:
+                row = processedLine.split(",")
+            tileRow = []
+            for num in row:
+                tile = sudokuTile([rowNum, colNum], num, layer)
+                layer += 1
+                tileRow.append(tile)
+                colNum += 1
+            arr.append(tileRow)
+            rowNum += 1
+        file.close()
+    puzzle = numpy.array(arr)
+    originalPuzzle = copy.deepcopy(puzzle)
+    if(ALGORITHM == 'bt'):
+        solvedPuzzle, steps = backTracking(puzzle)
+    elif(ALGORITHM == 'fc'):
+        solvedPuzzle, steps = forwardChecking(puzzle)
+    print(ALGORITHM)
+    print(PUZZLE_PATH)
+    print("=====================")
+    print("Original Puzzle: ")
+    printPuzzle(originalPuzzle)
+    print("Solved Puzzle in", steps, "steps:")
+    printPuzzle(solvedPuzzle)
 
 
-#Writing the finished puzzle to a file
-fileName = GROUP_ID + '_' + ALGORITHM + "_" + PUZZLE_TYPE + "_" + PUZZLE_PATH.lstrip("puzzles/")
-with open(fileName, 'w') as file:
-    for row in range(9):
-        for column in range(8):
-            file.write(puzzle[row][column].value + ",")
-        file.write(puzzle[row][8].value + '\n')
-    file.close()
+    #Writing the finished puzzle to a file
+    fileName = GROUP_ID + '_' + ALGORITHM + "_" + PUZZLE_TYPE + "_" + PUZZLE_PATH.lstrip("puzzles/")
+    with open(fileName, 'w') as file:
+        for row in range(9):
+            for column in range(8):
+                file.write(puzzle[row][column].value + ",")
+            file.write(puzzle[row][8].value + '\n')
+        file.close()
 
 
