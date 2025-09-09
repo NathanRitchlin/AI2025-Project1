@@ -3,7 +3,7 @@ import numpy
 GROUP_ID = 'Group04'
 ALGORITHM = 'bt'
 PUZZLE_TYPE = 'easy'
-PUZZLE_PATH = 'puzzles/Easy-P2.txt'
+PUZZLE_PATH = 'puzzles/Easy-P3.txt'
 
 #prints the sudoku puzzle, used for debugging
 def printPuzzle(puzzle):
@@ -26,43 +26,44 @@ class sudokuTile:
         else:
             self.domain = [val]
 
-def checkPuzzle(p):
-    #checks if puzzle passes row rule
+def checkConstraintsViolated(p):
+    violations = 0
+    # checks if puzzle passes row rule
     for row in range(9):
         nums = []
         for column in range(9):
             nums.append(p[row][column].value)
         newNums = [item for item in nums if item != "?"]
         setNums = set(newNums)
-        if len(newNums) > len(setNums):
-            #print("Fails to pass row rule")
-            return False
+        violations += len(newNums)- len(setNums)
 
-
-    #checks if puzzle passes column rule
+    # checks if puzzle passes column rule
     for column in range(9):
         nums = []
         for row in range(9):
             nums.append(p[row][column].value)
         newNums = [item for item in nums if item != "?"]
         setNums = set(newNums)
-        if len(newNums) > len(setNums):
-            #print("Fails to pass column rule")
-            return False
+        violations += len(newNums)- len(setNums)
 
-    #checks if puzzle passes 3x3 grid rules
+    # checks if puzzle passes 3x3 grid rules
     for i in range(3):
         for j in range(3):
             nums = []
-            for row in range(0+(i*3), (i*3)+3):
-                for column in range(0+(j*3), (j*3)+3):
+            for row in range(0 + (i * 3), (i * 3) + 3):
+                for column in range(0 + (j * 3), (j * 3) + 3):
                     nums.append(p[row][column].value)
             newNums = [item for item in nums if item != "?"]
             setNums = set(newNums)
-            if len(newNums) > len(setNums):
-                #print("Fails to pass 3x3 rule")
-                return False
-    return True
+            violations += len(newNums)- len(setNums)
+    return violations
+
+def checkPuzzle(p):
+    numConstraintsViolated = checkConstraintsViolated(p)
+    if(numConstraintsViolated > 0):
+        return False
+    else:
+        return True
 
 #Simple backtracking algorithm using a stack
 def backTracking(puzzle):
