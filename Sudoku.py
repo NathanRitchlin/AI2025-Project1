@@ -26,6 +26,7 @@ class sudokuTile:
         else:
             self.domain = [val]
 
+
 def checkConstraintsViolated(p):
     violations = 0
     # checks if puzzle passes row rule
