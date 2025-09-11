@@ -1,5 +1,6 @@
 import copy
 import numpy
+import matplotlib.pyplot as plt
 GROUP_ID = 'Group04'
 ALGORITHM = 'bt'
 PUZZLE_TYPE = 'easy'
